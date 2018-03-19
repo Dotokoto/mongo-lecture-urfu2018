@@ -18,14 +18,23 @@
         <small>Наталья Аксёнова</small>
     </p>
 </section>
-
 <section>
-    <section>
-        <h3>SQL</h3>
+    <section data-transition="none">
+        <ol>
+            <li>Frontend</li>
+            <li>Backend</li>
+            <li>????</li>
+            <li>PROFIT!!!</li>
+        </ol>
     </section>
-</section>
-
-<section>
+    <section data-transition="none">
+        <ol>
+            <li>Frontend</li>
+            <li>Backend</li>
+            <li>Database</li>
+            <li>PROFIT!!!</li>
+        </ol>
+    </section>
     <section>
         <h2>CAP теорема</h2>
     </section>
@@ -375,6 +384,10 @@
 })</code></pre>
     </section>
     <section>
+        <h4>Read. findOne</h4>
+        <pre><code class="hljs javascript">db.students.findOne({ name: 'Барсик' })</code></pre>
+    </section>
+    <section>
         <h4>Update</h4>
         <pre><code class="hljs javascript size-XS">db.collection.update(query, update, options)</code></pre>
         <a href="https://docs.mongodb.com/manual/reference/operator/update/">Список update операторов</a>
@@ -382,35 +395,82 @@
     <section>
         <h4>Update. Set</h4>
         <pre><code class="hljs javascript size-XS">db.students.update(
-    { group: /4\d{2}/ },    // query
-    { $set: { course: 4 }}, // update
+    { group: /1\d{2}/ },    // query
+    { $set: { course: 1 }}, // update
     { multi: true }         // options
 )</code></pre>
     </section>
     <section>
         <h4>Update. Increment</h4>
         <pre><code class="hljs javascript">db.students.update(
-    {},
+    { tail: { $exists: false }},
     { $inc: { course: 1 }},
     { multi: true }
 )</code></pre>
     </section>
     <section>
-        <h4>Update. Push</h4>
-        <pre><code class="hljs javascript">db.groups.update(
-    { name: 'КН-401' },
-    { $push:
-        {students: ObjectId("5aad01f2cd1cce7ab360e829")}
-    }
+        <h4>Update. Отчисление 😿</h4>
+        <pre><code class="hljs javascript">db.students.update(
+     { tail: { $exists: true }},
+     { $set: { isDismissed: true }}
 )</code></pre>
+        <img class="fragment" height="400" src="images/matmech-cat.jpg">
+    </section>
+    <section>
+        <h4>Update. Pull & Push</h4>
+        <pre><code class="hljs javascript">db.groups.update(
+    { name: 'КБ-401' },
+    { $pull: { students: 'Барсик' }}
+)</code></pre>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.groups.update(
+    { name: 'КБ-401' },
+    { $push: { students: 'Катя' }}
+)</code></pre>
+        <pre class="fragment"><code class="hljs javascript">{
+    "_id" : ObjectId("5ab01e9ffe72f33d2d9b637a"),
+    "name" : "КБ-401",
+    "students" : [ "Иван", "Катя" ]
+}</code></pre>
     </section>
     <section>
         <h4>Delete</h4>
-        <pre><code class="hljs javascript size-XXS" data-trim>db.students.remove() // Удаление всех документов в коллекции</code></pre>
-        <div></div>
-        <pre><code class="hljs javascript size-XXS" data-trim>db.students.remove({_id: ObjectID("5aad01f2cd1cce7ab360e829")})</code></pre>
+        <pre style="margin-bottom: 15px;"><code class="hljs javascript" data-trim>db.collection.remove(query, justOne)</code></pre>
+        <pre style="margin-bottom: 15px;" class="fragment"><code class="hljs javascript">db.students.remove({})</code></pre>
+        <pre class="fragment"><code class="hljs javascript">db.students.remove({}, true)</code></pre>
     </section>
 </section>
+
+<section>
+    <section data-transition="none">
+        <h4>Снова про отчисление</h4>
+        <pre class="fragment" style="margin-bottom: 20px;"><code class="hljs javascript">db.students.update(
+     { name: 'Барсик' },
+     { $set: { isDismissed: true }}
+)</code></pre>
+        <pre class="fragment"><code class="hljs javascript">db.groups.update(
+    { name: 'КБ-401' },
+    { $pull: { students: 'Барсик' }}
+)</code></pre>
+    </section>
+    <section data-transition="none">
+        <h4>Снова про отчисление</h4>
+        <pre style="margin-bottom: 20px; background-color: rgba(0,255,0,0.2)"><code class="hljs javascript">db.students.update(
+     { name: 'Барсик' },
+     { $set: { isDismissed: true }}
+)</code></pre>
+        <pre style="background-color: rgba(255,0,0,0.2)"><code class="hljs javascript">db.groups.update(
+    { name: 'КБ-401' },
+    { $pull: { students: 'Барсик' }}
+)</code></pre>
+    </section>
+    <section>
+        <h3>Транзакции</h3>
+        <div class="fragment">Их нет.</div>
+        <div class="fragment">Но будут в MongoDB 4.0</div>
+    </section>
+</section>
+    
+
 <section>
     <section>
         <h3>Индексы</h3>
@@ -498,13 +558,7 @@
         <img style="background-color: #fff;" src="images/sharding-hash-based.svg">
     </section>
 </section>
-<section>
-    <section>
-        <h3>Транзакции</h3>
-        <div class="fragment">Их нет...</div>
-        <div class="fragment">Но будут в MongoDB 4.0</div>
-    </section>
-</section>
+
 
 <section>
     <section>
