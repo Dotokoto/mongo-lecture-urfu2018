@@ -23,19 +23,14 @@
     <section>
         <h3>SQL</h3>
     </section>
-    <section>
-        <h3>NoSQL</h3>
-    </section>
 </section>
-
 
 <section>
     <section>
         <h2>CAP теорема</h2>
     </section>
-
     <section>
-        <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
+        <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP" style="width: 85%;">
             Теорема CAP - эвристическое утверждение о том, что в любой реализации распределённых вычислений возможно обеспечить не более двух из трёх следующих свойств: согласованность данных, доступность, устойчивость к разделению.
         </blockquote>
     </section>
@@ -70,9 +65,16 @@
 
 <section>
     <section>
+        <h3>NoSQL</h3>
+    </section>
+    <section>
+        <img src="images/MongoDB_Gray_Logo_FullColor_RGB-01.jpg">
+    </section>
+    <section>
         <h3>MongoDB</h3>
         <div>Документо-ориентированная база данных</div>
         <div>Данные хранятся в JSON-подобном формате</div>
+        <div>Схема для данных необязательна</div>
         <div>Для запросов используется Javascript</div>
     </section>
     <section>
@@ -80,19 +82,8 @@
         <a href="https://www.mongodb.com/download-center#community">https://www.mongodb.com/download-center#community</a>
     </section>
     <section>
-        <h4>Подключение</h4>
-        <pre><code class="hljs bash size-XXS">mongo #Подключение к локальной базе</code></pre>
-        <pre><code class="hljs bash size-XXS">mongo "mongodb://&lt;dbuser&gt;:&lt;dbpassword&gt;@ds129156.mlab.com:29156/test"</code></pre>
-    </section>
-    <section>
-        <h4>Базы данных</h4>
-        <pre><code class="hljs javascript">db // Показать текущую базу</code></pre>
-        <pre><code class="hljs javascript">show dbs // Список баз</code></pre>
-        <pre><code class="hljs javascript">use &lt;database&gt; // Переключение базы</code></pre>
-    </section>
-    <section>
         <h4>Коллекции</h4>
-        <img src="images/collection.svg" alt="collection">
+        <img style="background-color: #fff;" src="images/collection.svg" alt="collection">
     </section>
     <section>
         <h4>Валидация документов в коллекции</h4>
@@ -133,45 +124,151 @@
         </ul>
     </section>
     <section>
-        <h4>Create</h4>
-<pre><code class="hljs javascript size-XS">db.students.insert({
+        <h4>Create. Одна запись</h4>
+        <pre><code class="hljs javascript size-XS">db.students.insert({
     name: 'Иван',
-    familyName: 'Иванов',
-    age: 20
-});
+    age: 20,
+    group: 'КБ-401'
+})
 </code></pre>
     </section>
     <section>
-        <h4>Read</h4>
-<pre><code class="hljs javascript size-XS">db.students.findOne();</code></pre>
-<pre class="fragment"><code class="hljs json size-XS">{
-    "_id" : ObjectId("5aad01f2cd1cce7ab360e829"),
+        <h4>Create. Несколько записей</h4>
+    <pre><code class="hljs javascript">db.students.insert([
+    { age: 20, group: 'КБ-401' },
+    { name: 'Анна', age: '21 год', group: 'КБ-401' },
+    { name: 'Барсик', age: 5, tail: 'long' }
+])</code></pre>
+        <p class="fragment" style="font-size: 80px;">❓ 👩 😺</p>
+    </section>
+    <section>
+        <img src="images/trash.png">
+    </section>
+    <section>
+        <h4>Удаление коллекции</h4>
+        <pre><code class="hljs javascript">db.students.drop()</code></pre>
+    </section>
+    <section>
+        <h4>Валидация документов в коллекции</h4>
+        <pre><code class="hljs javascript size-XXS">db.createCollection("students", {
+    validator: {
+        $jsonSchema: {
+            bsonType: "object",
+            required: ["name", "group"],
+            properties: {
+                name: {
+                    bsonType: "string",
+                    description: "Student name"
+                },
+                group: {
+                    bsonType: "string",
+                    description: "Student group"
+                },
+                age: {
+                    bsonType: "number",
+                    minimum: 1,
+                    maximum: 100,
+                    description: "Student age"
+                }
+            }
+        }
+    }
+})</code></pre>
+    </section>
+    <section>
+        <h4>Create. Успешное добавление</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.insert(
+    { name: 'Иван', age: 20, group: 'КБ-401' }
+)</code></pre>
+        <pre class="fragment"><code class="hljs javascript">WriteResult({ "nInserted" : 1 })</code></pre>
+    </section>
+    <section>
+        <h4>Create. Дополнительные поля</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.insert({
+    name: 'Барсик',
+    age: 5,
+    group: 'КБ-401',
+    tail: 'long'
+})</code></pre>
+        <pre class="fragment"><code class="hljs javascript">WriteResult({ "nInserted" : 1 })</code></pre>
+    </section>
+    <section>
+        <h4>Create. Ошибка валидации</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.insert({ age: 20, group: 'КБ-401' })</code></pre>
+        <pre class="fragment"><code class="hljs javascript">WriteResult({
+	"nInserted" : 0,
+	"writeError" : {
+		"code" : 121,
+		"errmsg" : "Document failed validation"
+	}
+})</code></pre>
+    </section>
+
+    <section>
+        <h4>Read. Все документы</h4>
+<pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.find()</code></pre>
+<pre class="fragment"><code class="hljs javascript">{ "_id" : ObjectId("5ab00cbffe72f33d2d9b6378"), "name" : "Иван", "age" : 20, "group" : "КБ-401" }
+{ "_id" : ObjectId("5ab00cbffe72f33d2d9b6379"), "name" : "Барсик", "age" : 5, "group" : "КБ-401", "tail" : "long" }</code></pre>
+    </section>
+    <section>
+        <h4>Read. Pretty</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.find().pretty()</code></pre>
+        <pre class="fragment"><code class="hljs javascript">{
+    "_id" : ObjectId("5ab00cbffe72f33d2d9b6378"),
     "name" : "Иван",
-    "familyName" : "Иванов",
-    "age" : 20
+    "age" : 20,
+    "group" : "КБ-401"
 }
-</code></pre>
+{
+    "_id" : ObjectId("5ab00cbffe72f33d2d9b6379"),
+    "name" : "Барсик",
+    "age" : 5,
+    "group" : "КБ-401",
+    "tail" : "long"
+}</code></pre>
     </section>
     <section>
-        <h4>ID документа</h4>
-        <ul>
-            <li>Все записи должны иметь поле "_id"</li>
-            <li>_id должен быть уникальным в пределах коллекции</li>
-            <li>Генерируется автоматически, если не был передан</li>
-        </ul>
+        <h4>Read. Получение массива</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.find().toArray()</code></pre>
+        <pre><code class="hljs javascript">[
+    {
+        "_id" : ObjectId("5ab00cbffe72f33d2d9b6378"),
+        "name" : "Иван",
+        "age" : 20,
+        "group" : "КБ-401"
+    },
+    {
+        "_id" : ObjectId("5ab00cbffe72f33d2d9b6379"),
+        "name" : "Барсик",
+        "age" : 5,
+        "group" : "КБ-401",
+        "tail" : "long"
+    }
+]</code></pre>
     </section>
     <section>
-        <h4>ObjectID</h4>
-<pre><code>ObjectId("5aad01f2cd1cce7ab360e829")</code></pre>
-        <div class="left-align font-small">
-            <div><span>5aad01f2</span> - время</div>
-            <div><span>cd1cce</span> - идентификатор машины</div>
-            <div><span>7ab3</span> - PID</div>
-            <div><span>60e829</span> - счетчик</div>
-        </div>
+        <p>ObjectId("5ab00cbffe72f33d2d9b6378")</p>
+        <table>
+            <tr>
+                <td>4 байта</td>
+                <td>timestamp</td>
+            </tr>
+            <tr>
+                <td>3 байта</td>
+                <td>mid</td>
+            </tr>
+            <tr>
+                <td>2 байта</td>
+                <td>pid</td>
+            </tr>
+            <tr>
+                <td>3 байта</td>
+                <td>inc</td>
+            </tr>
+        </table>
     </section>
     <section>
-        <h4>Read</h4>
+        <h4>Read. Find</h4>
 <pre><code class="hljs javascript size-XS">db.collection.find(query, projection)</code></pre>
         <div>
             <ul>
@@ -182,34 +279,32 @@
     </section>
 
     <section>
-        <h4>Read</h4>
-        <pre><code class="hljs javascript">db.students.find({ name: 'Иван' })</code></pre>
-        <pre class="fragment"><code class="hljs javascript">db.students.find({ name: 'Иван' }).toArray()</code></pre>
-        <pre class="fragment"><code class="hljs javascript size-XXS">[
-	{
-		"_id" : ObjectId("5aaf667948e4cbf08dca7736"),
-		"name" : "Иван",
-		"course" : 4,
-		"group" : "КН-401"
-	},
-	{
-		"_id" : ObjectId("5aaf678a48e4cbf08dca7737"),
-		"name" : "Иван",
-		"course" : 4,
-		"age" : 20,
-		"group" : "КБ-401"
-	}
-]</code></pre>
+        <h4>Read. Query</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.find({ name: 'Иван' })</code></pre>
+        <pre class="fragment"><code class="hljs javascript">{
+    "_id" : ObjectId("5ab00cbffe72f33d2d9b6378"),
+    "name" : "Иван",
+    "age" : 20,
+    "group" : "КБ-401"
+}</code></pre>
     </section>
     <section>
         <h4>Read. Projection</h4>
-        <pre><code class="hljs javascript">db.groups.find({}, { _id: 0, name: 1 }).toArray()</code></pre>
-
-        <pre class="fragment"><code class="hljs javascript" data-trim>[
-    { name: 'КБ-401' },
-    { name: 'КН-401' },
-    { name: 'ФИИТ-401' }
-]</code></pre>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.find({ name: 'Иван' }, { name: 1, group: 1 })</code></pre>
+        <pre class="fragment"><code class="hljs javascript">{
+    "_id" : ObjectId("5ab00cbffe72f33d2d9b6378"),
+    "name" : "Иван",
+    "group" : "КБ-401"
+}</code></pre>
+    </section>
+    <section>
+        <h4>Read. Projection. Исключение полей</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.students.find({ name: 'Иван' }, { _id: 0 })</code></pre>
+        <pre class="fragment"><code class="hljs javascript">{
+    "name" : "Иван",
+    "age" : 20,
+    "group" : "КБ-401"
+}</code></pre>
     </section>
     <section>
         <h4>Read. Операторы</h4>
@@ -232,30 +327,51 @@
     </section>
     <section>
         <h4>Read. Поиск по массиву</h4>
-        <pre><code class="hljs javascript">{
-    "_id" : ObjectId("5aae93e1cd1cce7ab360e82a"),
+        <pre><code class="hljs javascript">db.groups.insert([
+    {
+        name: 'КБ-401',
+        students: [
+            'Иван',
+            'Барсик'
+        ]
+    },
+    {
+        name: 'КН-301',
+        students: [
+            'Анна',
+            'Иван',
+            'Игорь'
+        ]
+    }
+])</code></pre>
+    </section>
+    <section>
+        <h4>Read. Поиск по массиву</h4>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">db.groups.find(
+    { students: 'Иван' },
+    { _id: 0, name: 1, students: 1 }
+)</code></pre>
+        <pre class="fragment"><code class="hljs javascript">{
     "name" : "КБ-401",
-    "students": [
-            ObjectId("5aaf678a48e4cbf08dca7737"),
-            ObjectId("5aaf6bc648e4cbf08dca7739"),
-            ObjectId("5aaf6bd148e4cbf08dca773a")
-    ]
+    "students" : [ "Иван", "Барсик" ]
+}
+{
+    "name" : "КН-301",
+    "students" : [ "Анна", "Иван", "Игорь" ]
 }</code></pre>
-        <pre><code class="hljs javascript">db.groups.find({
-    students: ObjectId("5aaf6bd148e4cbf08dca773a")
-})</code></pre>
     </section>
     <section>
         <h4>Read. Поиск по вложенным документам</h4>
-        <pre><code>{
-    name: 'Александр',
+        <pre style="margin-bottom: 10px;"><code>{
+    name: 'Анна',
+    group: 'КН-301',
     grades: {
-        math: [3, 4, 5],
-        english: [5, 5]
+        javascript: [1,1,1,1,1,1,1,1,1,1],
+        verstka: [1,1,1,1,1,1,0.5,1,1,1,0]
     }
 }</code></pre>
-        <pre><code class="hljs javascript">db.students.find({
-    'grades.math.2': 5
+        <pre class="fragment"><code class="hljs javascript">db.students.find({
+    'grades.javascript.9': 1
 })</code></pre>
     </section>
     <section>
@@ -512,8 +628,13 @@ query.exec(function (err, student) {
         <h3>Delete</h3>
         <pre><code class="hljs javascript">Student.remove({group: 'КН-401'})</code></pre>
     </section>
+    <section>
+        <h3>Индексы</h3>
+    </section>
 </section>
-
+<section>
+    <h2>Ссылки</h2>
+</section>
 
 
 <script src="../lib/js/head.min.js"></script>
