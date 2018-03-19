@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8">
+    <title>MongoDB</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, minimal-ui">
+    <link rel="stylesheet" href="../css/reveal.css">
+    <link rel="stylesheet" href="../css/theme/yandex.css" id="theme">
+    <link rel="stylesheet" href="../lib/css/zenburn.css">
+    <link rel="stylesheet" href="./css/user.css">
+</head>
+<body class="yandex nodejs"><div class="reveal"><div class="slides">
+
+<section class="large">
+    <h3>Базы данных</h3>
+    <h3>MongoDB</h3>
+    <p class="author">
+        <small>Наталья Аксёнова</small>
+    </p>
+</section>
+
+<section>
+    <section>
+        <h3>SQL</h3>
+    </section>
+    <section>
+        <h3>NoSQL</h3>
+    </section>
+</section>
+
+
+<section>
+    <section>
+        <h2>CAP теорема</h2>
+    </section>
+
+    <section>
+        <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
+            Теорема CAP - эвристическое утверждение о том, что в любой реализации распределённых вычислений возможно обеспечить не более двух из трёх следующих свойств: согласованность данных, доступность, устойчивость к разделению.
+        </blockquote>
+    </section>
+
+    <section>
+        <h3>Cогласованность данных</h3>
+
+        <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
+            (англ. consistency) — во всех вычислительных узлах в один момент времени данные не противоречат друг другу
+        </blockquote>
+    </section>
+
+    <section>
+        <h3>Доступность</h3>
+
+        <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
+            (англ. availability) — любой запрос к распределённой системе завершается корректным откликом, однако без гарантии, что ответы всех узлов системы совпадают
+        </blockquote>
+    </section>
+
+    <section>
+        <h3>Устойчивость к разделению</h3>
+
+        <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
+            (англ. partition tolerance) — расщепление распределённой системы на несколько изолированных секций не приводит к некорректности отклика от каждой из секций
+        </blockquote>
+    </section>
+
+    <section data-background='images/cap.png' data-background-size='contain'>
+    </section>
+</section>
+
+<section>
+    <section>
+        <h3>MongoDB</h3>
+        <div>Документо-ориентированная база данных</div>
+        <div>Данные хранятся в JSON-подобном формате</div>
+        <div>Для запросов используется Javascript</div>
+    </section>
+    <section>
+        <h4>Установка</h4>
+        <a href="https://www.mongodb.com/download-center#community">https://www.mongodb.com/download-center#community</a>
+    </section>
+    <section>
+        <h4>Подключение</h4>
+        <pre><code class="hljs bash size-XXS">mongo #Подключение к локальной базе</code></pre>
+        <pre><code class="hljs bash size-XXS">mongo "mongodb://&lt;dbuser&gt;:&lt;dbpassword&gt;@ds129156.mlab.com:29156/test"</code></pre>
+    </section>
+    <section>
+        <h4>Базы данных</h4>
+        <pre><code class="hljs javascript">db // Показать текущую базу</code></pre>
+        <pre><code class="hljs javascript">show dbs // Список баз</code></pre>
+        <pre><code class="hljs javascript">use &lt;database&gt; // Переключение базы</code></pre>
+    </section>
+    <section>
+        <h4>Коллекции</h4>
+        <img src="images/collection.svg" alt="collection">
+    </section>
+    <section>
+        <h4>Валидация документов в коллекции</h4>
+        <pre><code class="hljs javascript size-XXXS">db.createCollection("students", {
+   validator: {
+      $jsonSchema: {
+         bsonType: "object",
+         required: [ "name", "year" ],
+         properties: {
+            name: {
+               bsonType: "string",
+               description: "must be a string and is required"
+            },
+            gender: {
+               bsonType: "string",
+               description: "must be a string and is not required"
+            },
+            year: {
+               bsonType: "int",
+               minimum: 2017,
+               maximum: 3017,
+               description: "must be an integer in [ 2017, 3017 ] and is required"
+            }
+         }
+      }
+   }
+})</code></pre>
+    </section>
+</section>
+<section>
+    <section>
+            <h3>CRUD</h3>
+        <ul>
+            <li>Create</li>
+            <li>Read</li>
+            <li>Update</li>
+            <li>Delete</li>
+        </ul>
+    </section>
+    <section>
+        <h4>Create</h4>
+<pre><code class="hljs javascript size-XS">db.students.insert({
+    name: 'Иван',
+    familyName: 'Иванов',
+    age: 20
+});
+</code></pre>
+    </section>
+    <section>
+        <h4>Read</h4>
+<pre><code class="hljs javascript size-XS">db.students.findOne();</code></pre>
+<pre class="fragment"><code class="hljs json size-XS">{
+    "_id" : ObjectId("5aad01f2cd1cce7ab360e829"),
+    "name" : "Иван",
+    "familyName" : "Иванов",
+    "age" : 20
+}
+</code></pre>
+    </section>
+    <section>
+        <h4>ID документа</h4>
+        <ul>
+            <li>Все записи должны иметь поле "_id"</li>
+            <li>_id должен быть уникальным в пределах коллекции</li>
+            <li>Генерируется автоматически, если не был передан</li>
+        </ul>
+    </section>
+    <section>
+        <h4>ObjectID</h4>
+<pre><code>ObjectId("5aad01f2cd1cce7ab360e829")</code></pre>
+        <div class="left-align font-small">
+            <div><span>5aad01f2</span> - время</div>
+            <div><span>cd1cce</span> - идентификатор машины</div>
+            <div><span>7ab3</span> - PID</div>
+            <div><span>60e829</span> - счетчик</div>
+        </div>
+    </section>
+    <section>
+        <h4>Read</h4>
+<pre><code class="hljs javascript size-XS">db.collection.find(query, projection)</code></pre>
+        <div>
+            <ul>
+                <li>query - задает фильтры для выборки. Если не задан, возвращает все записи коллекции</li>
+                <li>projection - задает возвращаемые поля. Если не задан, возвращает все поля</li>
+            </ul>
+        </div>
+    </section>
+
+    <section>
+        <h4>Read</h4>
+        <pre><code class="hljs javascript">db.students.find({ name: 'Иван' })</code></pre>
+        <pre class="fragment"><code class="hljs javascript">db.students.find({ name: 'Иван' }).toArray()</code></pre>
+        <pre class="fragment"><code class="hljs javascript size-XXS">[
+	{
+		"_id" : ObjectId("5aaf667948e4cbf08dca7736"),
+		"name" : "Иван",
+		"course" : 4,
+		"group" : "КН-401"
+	},
+	{
+		"_id" : ObjectId("5aaf678a48e4cbf08dca7737"),
+		"name" : "Иван",
+		"course" : 4,
+		"age" : 20,
+		"group" : "КБ-401"
+	}
+]</code></pre>
+    </section>
+    <section>
+        <h4>Read. Projection</h4>
+        <pre><code class="hljs javascript">db.groups.find({}, { _id: 0, name: 1 }).toArray()</code></pre>
+
+        <pre class="fragment"><code class="hljs javascript" data-trim>[
+    { name: 'КБ-401' },
+    { name: 'КН-401' },
+    { name: 'ФИИТ-401' }
+]</code></pre>
+    </section>
+    <section>
+        <h4>Read. Операторы</h4>
+        <pre><code class="hljs javascript">db.students.find({
+    course: { $gte: 3 },
+    group: { $ne: 'КН-301' }
+})</code></pre>
+        <a href="https://docs.mongodb.com/manual/reference/operator/query/">Список операторов</a>
+    </section>
+
+    <section>
+        <h4>Read. Регулярные выражения</h4>
+        <pre><code class="hljs javascript">db.students.find({
+    group: { $regex: /КБ/}
+})</code></pre>
+        <pre><code class="hljs javascript">db.students.find({
+    group: /КБ/
+})</code></pre>
+        <a href="https://docs.mongodb.com/manual/reference/operator/query/regex/">Поиск по регулярным выражениям</a>
+    </section>
+    <section>
+        <h4>Read. Поиск по массиву</h4>
+        <pre><code class="hljs javascript">{
+    "_id" : ObjectId("5aae93e1cd1cce7ab360e82a"),
+    "name" : "КБ-401",
+    "students": [
+            ObjectId("5aaf678a48e4cbf08dca7737"),
+            ObjectId("5aaf6bc648e4cbf08dca7739"),
+            ObjectId("5aaf6bd148e4cbf08dca773a")
+    ]
+}</code></pre>
+        <pre><code class="hljs javascript">db.groups.find({
+    students: ObjectId("5aaf6bd148e4cbf08dca773a")
+})</code></pre>
+    </section>
+    <section>
+        <h4>Read. Поиск по вложенным документам</h4>
+        <pre><code>{
+    name: 'Александр',
+    grades: {
+        math: [3, 4, 5],
+        english: [5, 5]
+    }
+}</code></pre>
+        <pre><code class="hljs javascript">db.students.find({
+    'grades.math.2': 5
+})</code></pre>
+    </section>
+    <section>
+        <h4>Update</h4>
+        <pre><code class="hljs javascript size-XS">db.collection.update(query, update, options)</code></pre>
+        <a href="https://docs.mongodb.com/manual/reference/operator/update/">Список update операторов</a>
+    </section>
+    <section>
+        <h4>Update. Set</h4>
+        <pre><code class="hljs javascript size-XS">db.students.update(
+    { group: /4\d{2}/ },    // query
+    { $set: { course: 4 }}, // update
+    { multi: true }         // options
+)</code></pre>
+    </section>
+    <section>
+        <h4>Update. Increment</h4>
+        <pre><code class="hljs javascript">db.students.update(
+    {},
+    { $inc: { course: 1 }},
+    { multi: true }
+)</code></pre>
+    </section>
+    <section>
+        <h4>Update. Push</h4>
+        <pre><code class="hljs javascript">db.groups.update(
+    { name: 'КН-401' },
+    { $push:
+        {students: ObjectId("5aad01f2cd1cce7ab360e829")}
+    }
+)</code></pre>
+    </section>
+    <section>
+        <h4>Delete</h4>
+        <pre><code class="hljs javascript size-XXS" data-trim>db.students.remove() // Удаление всех документов в коллекции</code></pre>
+        <div></div>
+        <pre><code class="hljs javascript size-XXS" data-trim>db.students.remove({_id: ObjectID("5aad01f2cd1cce7ab360e829")})</code></pre>
+    </section>
+</section>
+<section>
+    <section>
+        <h3>Индексы</h3>
+    </section>
+    <section>
+        <h4>Индексы</h4>
+        <img style="background-color: #fff;" src="images/index-for-sort.svg">
+
+    </section>
+    <section>
+        <h3>Создание индекса</h3>
+        <pre><code class="hljs javascript size-XS">db.students.createIndex({group: 1})</code></pre>
+    </section>
+    <section>
+        <h3>Уникальный индекс</h3>
+        <pre><code class="hljs javascript size-XXS">db.groups.createIndex({name: 1}, {unique: true})</code></pre>
+        <pre><code class="hljs javascript size-XXS">db.groups.insert({name: 'КБ-401'})</code></pre>
+        <pre><code class="hljs javascript size-XXXS">WriteResult({ "nInserted" : 1 })</code></pre>
+        <pre><code class="hljs javascript size-XXS">db.groups.insert({name: 'КБ-401'})</code></pre>
+        <pre><code class="hljs javascript size-XXXS">WriteResult({
+	"nInserted" : 0,
+	"writeError" : {
+		"code" : 11000,
+		"errmsg" : "E11000 duplicate key error collection:
+                            mongo-lecture.groups index: name_1 dup key: { : \"КБ-401\" }"
+	}
+})</code></pre>
+    </section>
+    <section>
+        <h3>Составной индекс</h3>
+        <pre><code class="hljs javascript">db.students.createIndex({
+    course: -1,
+    group: 1
+})</code></pre>
+    </section>
+    <section>
+        <h3>Получение существующих индексов</h3>
+        <pre><code data-trim class="hljs javascript size-XXS">db.students.getIndexes()</code></pre>
+        <pre><code data-trim class="hljs json size-XXXS">[
+	{
+		"v" : 2,
+		"key" : {
+			"_id" : 1
+		},
+		"name" : "_id_",
+		"ns" : "mongo-lecture.students"
+	},
+	{
+		"v" : 2,
+		"key" : {
+			"group" : 1
+		},
+		"name" : "group_1",
+		"ns" : "mongo-lecture.students"
+	}
+]</code></pre>
+    </section>
+</section>
+<section>
+    <section>
+        <h2>Репликация и шардирование</h2>
+    </section>
+    <section>
+        <h4>Репликация</h4>
+        <img style="background-color: #fff;" src="images/replica-set-1.svg">
+    </section>
+    <section>
+        <h4>Репликация</h4>
+        <img style="background-color: #fff;" src="images/replica-set-2.svg">
+    </section>
+    <section>
+        <h4>Репликация</h4>
+        <img style="background-color: #fff;" src="images/replica-set-3.svg">
+    </section>
+    <section>
+        <h4>Шардирование</h4>
+        <img style="background-color: #fff;" width="600" src="images/sharded-collection.png">
+    </section>
+    <section>
+        <h4>Шардирование</h4>
+        <img style="background-color: #fff;" src="images/sharding-range-based.svg">
+    </section>
+    <section>
+        <h4>Шардирование</h4>
+        <img style="background-color: #fff;" src="images/sharding-hash-based.svg">
+    </section>
+</section>
+<section>
+    <section>
+        <h3>Транзакции</h3>
+        <div class="fragment">Их нет...</div>
+        <div class="fragment">Но будут в MongoDB 4.0</div>
+    </section>
+</section>
+
+<section>
+    <section>
+        <h2>Mongoose</h2>
+    </section>
+    <section>
+        <h3>Установка и подключение</h3>
+        <pre style="margin-bottom: 15px;"><code class="hljs bash">npm install mongoose</code></pre>
+        <pre><code data-trim class="hljs javascript">const mongoose = require('mongoose');
+const URI = 'mongodb://localhost/mongo-lecture';
+
+mongoose.connect(URI).then(
+    () => { /** ready to use */ },
+    err => { /** handle initial connection error */ }
+)</code></pre>
+    </section>
+    <section>
+        <h3>Модели</h3>
+        <pre><code class="hljs javascript">const Schema = mongoose.Schema;
+
+const studentSchema = new Schema({
+    name: String,
+    age: { type: Number, min: 16 },
+    course: { type: Number, default: 1 },
+    group: { type: String, uppercase: true, required: true }
+});
+
+const Student = mongoose.model('Student', studentSchema);</code></pre>
+        <a href="http://mongoosejs.com/docs/schematypes.html">Подробнее про схемы</a>
+    </section>
+    <section>
+        <h3>Типы данных</h3>
+        <ul>
+            <li>String</li>
+            <li>Number</li>
+            <li>Date</li>
+            <li>Buffer</li>
+            <li>Boolean</li>
+            <li>Mixed</li>
+            <li>ObjectId</li>
+            <li>Array</li>
+        </ul>
+    </section>
+    <section>
+        <h3>Модели. Виртуальные поля</h3>
+        <pre><code class="hljs javascript">const personSchema = new Schema({
+    name: {
+        first: String,
+        last: String
+    }
+});</code></pre>
+<pre class="fragment"><code>personSchema.virtual('fullName').get(function () {
+  return `${this.name.first} ${this.name.last}`;
+});
+
+const ivan = new Person({
+    name: { first: 'Иван', last: 'Иванов' }
+});
+
+console.log(ivan.fullName); // Иван Иванов</code></pre>
+    </section>
+    <section>
+        <h2>CRUD</h2>
+    </section>
+    <section>
+        <h3>Create</h3>
+        <pre><code class="hljs javascript">const student = new Student({
+    name: 'Иван',
+    group: 'КБ-401',
+    course: 4
+});</code></pre>
+        <pre class="fragment"><code class="hljs javascript">student
+    .save()
+    .then(function (savedStudent) {})
+    .catch(function (err) {});</code></pre>
+    </section>
+    <section>
+        <h3>Read</h3>
+        <pre><code class="hljs javascript">const query = Student.findOne({name: 'Иван'});</code></pre>
+        <pre class="fragment"><code class="hljs javascript">query.where({group: 'КБ-401'});
+query.select({name: 1, group: 1});
+
+query.exec(function (err, student) {
+    if (err) { console.log(err); }
+    console.log('found student:', student);
+});</code></pre>
+    </section>
+    <section>
+        <h3>Read</h3>
+        <pre><code class="hljs javascript">Student
+    .find({ course: { $gt: 1 }})
+    .limit(20)
+    .sort({ course: 1, group: 1 })
+    .select({ course: 1, group: 1, name: 1 })
+    .exec(callback);</code></pre>
+    </section>
+    <section>
+        <h3>Update</h3>
+        <pre><code class="hljs javascript">student.update({ $inc: { course: 1 }})</code></pre>
+    </section>
+    <section>
+        <h3>Update</h3>
+        <pre><code class="hljs javascript">Student.findById(
+    ObjectId("5aad01f2cd1cce7ab360e829"),
+    function (err, student) {
+        student.course = 5;
+        student.save(callback);
+    }
+);</code></pre>
+    </section>
+    <section>
+        <h3>Update</h3>
+        <pre><code class="hljs javascript">Student.update(
+            {},
+            { $inc: { course: 1 }},
+            { multi: true },
+            callback
+)</code></pre>
+    </section>
+    <section>
+        <h3>Delete</h3>
+        <pre><code class="hljs javascript">Student.remove({group: 'КН-401'})</code></pre>
+    </section>
+</section>
+
+
+
+<script src="../lib/js/head.min.js"></script>
+<script src="../js/reveal.js"></script>
+<script>
+    Reveal.initialize({
+        controls: false,
+        progress: true,
+        slideNumber: true,
+        history: true,
+        center: true,
+        hideAddressBar: true,
+        transition: 'slide',
+        dependencies: [
+            {
+                src: '../plugin/highlight/highlight.js',
+                async: true,
+                condition: function () {
+                    return Boolean(document.querySelector('pre code'));
+                },
+                callback: function () {
+                    hljs.initHighlightingOnLoad();
+                }
+            }
+        ]
+    });
+</script>
+</body>
+</html>
