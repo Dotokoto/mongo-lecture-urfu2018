@@ -469,60 +469,92 @@
         <div class="fragment">Но будут в MongoDB 4.0</div>
     </section>
 </section>
-    
+
 
 <section>
     <section>
         <h3>Индексы</h3>
     </section>
     <section>
-        <h4>Индексы</h4>
-        <img style="background-color: #fff;" src="images/index-for-sort.svg">
-
+        <h4>Индексы. Explain</h4>
+        <pre style="margin-bottom: 15px;"><code class="hljs javascript">db.students
+    .find({group: 'КБ-501'})
+    .explain('executionStats')</code></pre>
+        <pre class="fragment"><span>{
+    "nReturned" : 1,
+    "executionTimeMillis" : 0,
+    "totalKeysExamined" : 0,
+    <mark>"totalDocsExamined" : 303,</mark>
+    "executionStages" : {
+        "stage" : "COLLSCAN",
+        "filter" : {
+            "group" : { "$eq" : "КБ-501" }
+        }
+    }
+}</span></pre>
     </section>
     <section>
         <h3>Создание индекса</h3>
         <pre><code class="hljs javascript size-XS">db.students.createIndex({group: 1})</code></pre>
     </section>
     <section>
+        <h3>Поиск по индексу</h3>
+        <pre style="margin-bottom: 15px;"><code class="hljs">db.students
+    .find({group: 'КБ-501'})
+    .explain('executionStats')</code></pre>
+        <pre class="fragment"><span>{
+    "nReturned" : 1,
+    "executionTimeMillis" : 1,
+    "totalKeysExamined" : 1,
+    <mark>"totalDocsExamined" : 1,</mark>
+    "executionStages" : {
+        "stage" : "FETCH",
+        "inputStage" : {
+            "stage" : "IXSCAN",
+        }
+    }
+}</span></pre>
+    </section>
+    <section>
+        <h3>Уникальный индекс. Создание</h3>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript size-XS">db.groups.createIndex({name: 1}, {unique: true})</code></pre>
+        <pre class="fragment"><code class="hljs javascript size-XS">db.groups.insert({name: 'КБ-401'})</code></pre>
+        <pre class="fragment"><code class="hljs javascript size-XS">WriteResult({ "nInserted" : 1 })</code></pre>
+    </section>
+    <section>
         <h3>Уникальный индекс</h3>
-        <pre><code class="hljs javascript size-XXS">db.groups.createIndex({name: 1}, {unique: true})</code></pre>
-        <pre><code class="hljs javascript size-XXS">db.groups.insert({name: 'КБ-401'})</code></pre>
-        <pre><code class="hljs javascript size-XXXS">WriteResult({ "nInserted" : 1 })</code></pre>
-        <pre><code class="hljs javascript size-XXS">db.groups.insert({name: 'КБ-401'})</code></pre>
-        <pre><code class="hljs javascript size-XXXS">WriteResult({
-	"nInserted" : 0,
-	"writeError" : {
-		"code" : 11000,
-		"errmsg" : "E11000 duplicate key error collection:
-                            mongo-lecture.groups index: name_1 dup key: { : \"КБ-401\" }"
-	}
+        <pre><code class="hljs javascript size-XS">db.groups.insert({name: 'КБ-401'})</code></pre>
+        <pre class="fragment"><code class="hljs javascript size-XS">WriteResult({
+    "nInserted" : 0,
+    "writeError" : {
+        "code" : 11000,
+        "errmsg" : "E11000 duplicate key
+            error collection:
+            mongo-lecture.groups
+            index: name_1 dup key: { : \"КБ-401\" }"
+    }
 })</code></pre>
     </section>
     <section>
-        <h3>Составной индекс</h3>
+        <h4>Составной индекс</h4>
         <pre><code class="hljs javascript">db.students.createIndex({
     course: -1,
     group: 1
 })</code></pre>
     </section>
     <section>
-        <h3>Получение существующих индексов</h3>
-        <pre><code data-trim class="hljs javascript size-XXS">db.students.getIndexes()</code></pre>
-        <pre><code data-trim class="hljs json size-XXXS">[
+        <h4>Просмотр существующих индексов</h4>
+        <pre><code data-trim class="hljs javascript size-XS">db.students.getIndexes()</code></pre>
+        <pre><code data-trim class="hljs json size-XXS">[
 	{
 		"v" : 2,
-		"key" : {
-			"_id" : 1
-		},
+		"key" : { "_id" : 1 },
 		"name" : "_id_",
 		"ns" : "mongo-lecture.students"
 	},
 	{
 		"v" : 2,
-		"key" : {
-			"group" : 1
-		},
+		"key" : { "group" : 1 },
 		"name" : "group_1",
 		"ns" : "mongo-lecture.students"
 	}
@@ -534,28 +566,34 @@
         <h2>Репликация и шардирование</h2>
     </section>
     <section>
-        <h4>Репликация</h4>
+        <h4>Репликация. Запись и чтение</h4>
         <img style="background-color: #fff;" src="images/replica-set-1.svg">
     </section>
     <section>
-        <h4>Репликация</h4>
+        <h4>Репликация. Проверка состояния системы</h4>
         <img style="background-color: #fff;" src="images/replica-set-2.svg">
     </section>
     <section>
-        <h4>Репликация</h4>
+        <h4>Репликация. Отказ узла</h4>
         <img style="background-color: #fff;" src="images/replica-set-3.svg">
+    </section>
+    <section data-background='images/cap.png' data-background-size='contain'>
+    </section>
+    <section>
+        <h4>Шардирование</h4>
+        <img style="background-color: #fff;" src="images/Biggest%20Book%20Ever.jpg">
     </section>
     <section>
         <h4>Шардирование</h4>
         <img style="background-color: #fff;" width="600" src="images/sharded-collection.png">
     </section>
     <section>
-        <h4>Шардирование</h4>
-        <img style="background-color: #fff;" src="images/sharding-range-based.svg">
+        <h4>Шардирование. Range-based</h4>
+        <img style="background-color: #fff;" src="images/sharded-cluster-ranged-distribution-good.bakedsvg.svg">
     </section>
     <section>
-        <h4>Шардирование</h4>
-        <img style="background-color: #fff;" src="images/sharding-hash-based.svg">
+        <h4>Шардирование. Hash-based</h4>
+        <img style="background-color: #fff;" src="images/sharded-cluster-hashed-distribution.bakedsvg.svg">
     </section>
 </section>
 
