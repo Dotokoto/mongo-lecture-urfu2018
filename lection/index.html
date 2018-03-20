@@ -600,6 +600,10 @@
 
 <section>
     <section>
+        <h2>ODM</h2>
+        <span>Object Document Mapper</span>
+    </section>
+    <section>
         <h2>Mongoose</h2>
     </section>
     <section>
@@ -614,49 +618,84 @@ mongoose.connect(URI).then(
 )</code></pre>
     </section>
     <section>
-        <h3>Модели</h3>
+        <h4>Схемы</h4>
         <pre><code class="hljs javascript">const Schema = mongoose.Schema;
 
 const studentSchema = new Schema({
-    name: String,
-    age: { type: Number, min: 16 },
+    name: { type: String, required: true },
+    age: {
+        type: Number,
+        min: 1, max: 100,
+        required: true
+    },
+    course: Number,
+    group: { type: String, required: true }
+});</code></pre>
+        <a href="http://mongoosejs.com/docs/schematypes.html" class="size-S">Подробнее про схемы</a>
+    </section>
+    <section>
+        <h4>Возможности схем</h4>
+        <pre><code class="hljs javascript">studentSchema.add({
     course: { type: Number, default: 1 },
     group: { type: String, uppercase: true, required: true }
-});
-
-const Student = mongoose.model('Student', studentSchema);</code></pre>
-        <a href="http://mongoosejs.com/docs/schematypes.html">Подробнее про схемы</a>
+});</code></pre>
     </section>
     <section>
         <h3>Типы данных</h3>
-        <ul>
-            <li>String</li>
-            <li>Number</li>
-            <li>Date</li>
-            <li>Buffer</li>
-            <li>Boolean</li>
-            <li>Mixed</li>
-            <li>ObjectId</li>
-            <li>Array</li>
-        </ul>
+        <table>
+            <tr>
+                <td>String</td>
+                <td>Number</td>
+            </tr>
+            <tr>
+                <td>Date</td>
+                <td>Buffer</td>
+            </tr>
+            <tr>
+                <td>Boolean</td>
+                <td>Array</td>
+            </tr>
+            <tr>
+                <td>ObjectID</td>
+                <td>Mixed</td>
+            </tr>
+        </table>
+    </section>
+    <section>
+        <h3>Схемы. Индексы</h3>
+        <pre><code class="hljs javascript">const groupSchema = new Schema({
+    name: {
+        type: String, index: true, unique: true
+    },
+    students: [String]
+});</code></pre>
+    </section>
+    <section>
+        <h3>Модели</h3>
+        <pre style="margin-bottom: 10px;"><code class="hljs javascript">const Student = mongoose.model('Student', studentSchema);</code></pre>
+<pre class="fragment"><code class="hljs javascript">const ivan = new Student({
+    name: 'Иван',
+    age: 20,
+    group: 'кб-101'
+});</code></pre>
+        <pre class="fragment"><code class="hljs javascript">console.log(ivan.name); // "Иван"
+console.log(ivan.group); // "КБ-101"
+console.log(ivan.course); // 1
+        </code></pre>
     </section>
     <section>
         <h3>Модели. Виртуальные поля</h3>
-        <pre><code class="hljs javascript">const personSchema = new Schema({
-    name: {
-        first: String,
-        last: String
-    }
+        <pre><code class="hljs javascript">studentSchema.virtual('nameAndGroup').get(function () {
+  return `${this.name}, группа ${this.group}`;
 });</code></pre>
-<pre class="fragment"><code>personSchema.virtual('fullName').get(function () {
-  return `${this.name.first} ${this.name.last}`;
-});
+<pre class="fragment"><code class="hljs javascript">const Student = mongoose.model('Student', studentSchema);
 
 const ivan = new Person({
-    name: { first: 'Иван', last: 'Иванов' }
-});
-
-console.log(ivan.fullName); // Иван Иванов</code></pre>
+    name: 'Иван',
+    age: 20,
+    group: 'кб-101'
+});</code></pre>
+        <pre class="fragment"><code class="hljs javascript">console.log(ivan.nameAndGroup); // Иван, группа КБ-401</code></pre>
     </section>
     <section>
         <h2>CRUD</h2>
