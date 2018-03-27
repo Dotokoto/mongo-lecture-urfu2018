@@ -378,13 +378,13 @@
     <section>
         <h4>Read. Sort, skip, limit</h4>
         <pre style="margin-bottom: 15px;"><code>db.notes.find({}, { _id: 0, owner: 1, name: 1 })</code></pre>
-        <pre><code>{ "name" : "Films", "owner" : "Наталья" }
-{ "name" : "Books", "owner" : "Наталья" }
+        <pre><code>{ "name" : "Music", "owner" : "Вася" }
+{ "name" : "Films", "owner" : "Наталья" }
 {
     "name" : "Films for party",
     "owner" : [ "Наталья", "Анна" ]
 }
-{ "name" : "Music", "owner" : "Вася" }</code></pre>
+{ "name" : "Books", "owner" : "Наталья" }</code></pre>
     </section>
     <section>
         <h4>Read. Sort</h4>
@@ -501,7 +501,7 @@
     <section data-transition="fade-in none-out">
         <h4>Удаление заметки</h4>
         <pre style="margin-bottom: 20px;"><code class="hljs javascript">db.notes.remove(
-     { name: 'Films' }
+     { name: 'Films', owner: 'Наталья' }
 )</code></pre>
         <pre><code class="hljs javascript">db.users.update(
     { name: 'Наталья' },
@@ -511,7 +511,7 @@
     <section data-transition="none-in fade-out">
         <h4>Удаление заметки</h4>
         <pre style="margin-bottom: 20px; background-color: rgba(0,255,0,0.2)"><code class="hljs javascript">db.notes.remove(
-     { name: 'Films' }
+     { name: 'Films', owner: 'Наталья' }
 )</code></pre>
         <pre style="background-color: rgba(255,0,0,0.2)"><code class="hljs javascript">db.users.update(
     { name: 'Наталья' },
@@ -597,15 +597,48 @@
         <h4>Составной индекс</h4>
         <pre><code class="hljs javascript size-XS">db.notes.createIndex(
     {
-        owner: 1,
-        name: 1
-    },
-    { unique: true }
+        'score.likes': -1
+        name: 1,
+    }
 )</code></pre>
     </section>
     <section>
         <h4>Составной индекс. Сортировки</h4>
-        <pre><code>db.notes.find().sort({ owner: 1, name: 1 })</code></pre>
+        <pre><code>db.notes
+    .find()
+    .sort({ 'score.likes': -1, name: 1 })
+    .explain()</code></pre>
+        <pre class="fragment" style="margin-top: 20px;"><span>{
+    "inputStage" : {
+        <mark>"stage" : "IXSCAN",</mark>
+        "keyPattern" : {
+            "score.likes" : -1,
+            "name" : 1
+        },
+        <mark>"indexName" : "score.likes_-1_name_1"</mark>
+    }
+}</span></pre>
+    </section>
+    <section>
+        <h4>Составной индекс. Сортировки</h4>
+        <pre><code>db.notes
+    .find()
+    .sort({ 'score.likes': 1, name: 1 })
+    .explain()</code></pre>
+        <pre class="fragment" style="margin-top: 20px;"><span>{
+    "stage" : "SORT",
+    "sortPattern" : {
+        "score.likes" : 1,
+        "name" : 1
+    },
+    "inputStage" : {
+        "stage" : "SORT_KEY_GENERATOR",
+        "inputStage" : {
+            <mark>"stage" : "COLLSCAN",</mark>
+            "direction" : "forward"
+        }
+    }
+}</span></pre>
     </section>
     <section>
         <h4>Просмотр существующих индексов</h4>
@@ -629,6 +662,9 @@
 <section>
     <section>
         <h2>Репликация и шардирование</h2>
+    </section>
+    <section>
+        <img src="images/giphy%20(6).gif">
     </section>
     <section>
         <h4>Репликация. Запись и чтение</h4>
@@ -689,7 +725,7 @@ mongoose.connect(URI).then(
 const noteSchema = new Schema({
     name: { type: String, required: true },
     text: String,
-    owner: { type: String, required: true }
+    owner: { type: [String], required: true }
 });</code></pre>
         <a href="http://mongoosejs.com/docs/schematypes.html" class="size-S">Подробнее про схемы</a>
     </section>
@@ -722,12 +758,13 @@ const noteSchema = new Schema({
     </section>
     <section>
         <h3>Схемы. Индексы</h3>
-        <pre><code class="hljs javascript">const userSchema = new Schema({
+        <pre style="margin-bottom: 20px;"><code class="hljs javascript">const userSchema = new Schema({
     name: {
         type: String, index: true, unique: true
     },
     notes: [String]
 });</code></pre>
+        <pre class="fragment"><code>noteSchema.index({ owner: 1, name: 1 });</code></pre>
     </section>
     <section>
         <h3>Модели</h3>
@@ -772,10 +809,9 @@ const films = new Note({
     <section>
         <h3>Read</h3>
         <pre><code class="hljs javascript">const query = Note.find({owner: 'Наталья'});</code></pre>
-        <pre style="margin-bottom:15px;" class="fragment"><code class="hljs javascript">query.where({ version: {$gte: 2 }});
-query.select({name: 1, owner: 1});
-
-query.exec()
+        <pre style="margin-bottom:15px;" class="fragment"><code class="hljs javascript">query.where({version: {$gte: 2}});
+query.select({name: 1, owner: 1});</code></pre>
+        <pre class="fragment" style="margin-bottom: 10px;"><code>query.exec()
      .then(note => { console.log('found note': , note) })
      .catch(err => { console.log('error: ', err) });</code></pre>
         <pre class="fragment"><code>[ { owner: [ 'Наталья' ],
@@ -783,7 +819,7 @@ query.exec()
     name: 'Books' } ]</code></pre>
     </section>
     <section>
-        <h3>Read</h3>
+        <h3>Read. Sort, skip, limit</h3>
         <pre><code class="hljs javascript">Note
     .find({ version: { $gte: 1 }})
     .sort({ owner: 1, name: 1 })
@@ -801,7 +837,7 @@ query.exec()
         <pre><code class="hljs javascript">Note
     .findById(ObjectId("5ab77143f92855790b23a184"))
     .then(note => {
-        note.text = 'new note text';
+        note.text += ' new text';
         return note.save();
     })
     .then(saved => {
@@ -820,17 +856,19 @@ query.exec()
     </section>
     <section>
         <h3>Delete</h3>
-        <pre><code class="hljs javascript">Notes.remove({name: 'Books'})</code></pre>
+        <pre><code class="hljs javascript">Note.remove({name: 'Books'})</code></pre>
     </section>
 </section>
 <section>
     <section>
         <h2>Ссылки</h2>
-        <a href="https://habrahabr.ru/post/130577/">CAP-теорема простым, доступным языком</a>
-        <a href="https://docs.mongodb.com/manual/">Документация MongoDB 3.6</a>
-        <a href="http://mongoosejs.com/docs/guide.html">Документация Mongoose</a>
-        <a href="https://university.mongodb.com/courses/M101JS/about">Курс по MongoDB (на английском языке)</a>
-        <a href="https://docs.mongodb.com/manual/reference/sql-comparison/">SQL to MongoDB Mapping Chart</a>
+        <ul>
+            <li><a href="https://habrahabr.ru/post/130577/">CAP-теорема простым, доступным языком</a></li>
+            <li><a href="https://docs.mongodb.com/manual/">Документация MongoDB 3.6</a></li>
+            <li><a href="http://mongoosejs.com/docs/guide.html">Документация Mongoose</a></li>
+            <li><a href="https://university.mongodb.com/courses/M101JS/about">Курс по MongoDB (на английском языке)</a></li>
+            <li><a href="https://docs.mongodb.com/manual/reference/sql-comparison/">SQL to MongoDB Mapping Chart</a></li>
+        </ul>
     </section>
     <section>
         <h3>Спасибо!</h3>

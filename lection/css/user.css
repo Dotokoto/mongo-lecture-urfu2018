@@ -359,33 +359,6 @@ mark span {
     height: 100%;
 }
 
-#supercat .h3-supercat {
-    margin-top: -250px;
-}
-
-#cocaine .h3-cocaine {
-    margin-top: -250px;
-}
-
-.mokhov {
-    position: absolute;
-    top: 0;
-    left: 0;
-    transform: translateX(-100%);
-    animation-delay: 5s;
-    animation-duration: 3s;
-    animation-iteration-count: 2;
-    animation-direction: alternate;
-    z-index: 10;
-    display: none;
-}
-
-@keyframes move_mokhov {
-    100% {
-        transform: translateX(-10%);
-    }
-}
-
 span.red {
     color: red;
 }
