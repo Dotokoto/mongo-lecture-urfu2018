@@ -48,7 +48,7 @@
         <h3>Cогласованность данных</h3>
 
         <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
-            (англ. consistency) — чтение всегда возвращает последнюю запись
+            (англ. consistency) — во всех узлах системы в один момент времени данные не противоречат друг другу
         </blockquote>
     </section>
 
@@ -64,7 +64,7 @@
         <h3>Устойчивость к разделению</h3>
 
         <blockquote cite="https://ru.wikipedia.org/wiki/Теорема_CAP">
-            (англ. partition tolerance) — система продолжает работать корректно при наличии сетевых проблем
+            (англ. partition tolerance) — расщепление распределенной системы на несколько изолированных секций не приводит к некорректности отклика каждой из секций
         </blockquote>
     </section>
 
@@ -163,14 +163,8 @@
             bsonType: "object",
             required: ["name", "owner"],
             properties: {
-                name: {
-                    bsonType: "string",
-                    description: "Note title"
-                },
-                text: {
-                    bsonType: "string",
-                    description: "Note text"
-                },
+                name: { bsonType: "string", description: "Note title" },
+                text: { bsonType: "string", description: "Note text" },
                 owner: {
                     anyOf: [
                         { bsonType: "string" },
@@ -339,21 +333,18 @@
     </section>
     <section>
         <h4>Read. Поиск по массиву</h4>
-        <pre><code class="hljs javascript"><pre><code>{
-	"name" : "Books",
-	"owner" : "Наталья"
+        <pre><code class="hljs javascript">{
+    "name" : "Books",
+    "owner" : "Наталья"
 }
 {
-	"name" : "Films for party",
-	"owner" : [
-		"Наталья",
-		"Анна"
-	]
+    "name" : "Films for party",
+    "owner" : [ "Наталья", "Анна" ]
 }
 {
-	"name" : "Music",
-	"owner" : "Вася",
-}</code></pre></code></pre>
+    "name" : "Music",
+    "owner" : "Вася",
+}</code></pre>
     </section>
     <section>
         <h4>Read. Поиск по массиву</h4>
@@ -418,8 +409,14 @@
         <pre style="margin-bottom: 15px;"><code>db.notes
     .find({}, { _id: 0, name: 1, owner: 1 })
     .skip(2)</code></pre>
-        <pre class="fragment"><code>{ "name" : "Films for party", "owner" : [ "Наталья", "Анна" ] }
-{ "name" : "Music", "owner" : "Вася" }</code></pre>
+        <pre class="fragment"><code>{
+    "name" : "Films for party",
+    "owner" : [ "Наталья", "Анна" ]
+}
+{
+    "name" : "Music",
+    "owner" : "Вася"
+}</code></pre>
     </section>
     <section>
         <h4>Read. Sort-skip-limit</h4>
@@ -435,7 +432,7 @@
     </section>
     <section>
         <h4>Read. Count</h4>
-        <pre><code>db.notes.find({ owner: 'Наталья' }).count() // 3</code></pre>
+        <pre><code>db.notes.count({ owner: 'Наталья' }) // 3</code></pre>
         <pre class="fragment"><code>db.notes.count() // 4</code></pre>
     </section>
     <section>
